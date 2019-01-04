@@ -7,7 +7,7 @@ using HtmlAgilityPack;
 
 namespace MPKXMLCrawler
 {
-    [NodeRequest(request = Requests.Types.Lines)]
+    [NodeRequest(requestType = Requests.Types.Lines)]
     [NodeXPath(path = "/html/body/table/tbody/tr/td/table/tr[2]/td/table/tr/td/details/table/tr")]
     public class LineClass
     {

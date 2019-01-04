@@ -12,16 +12,17 @@ namespace MPKXMLCrawler
         public string path;
         public HtmlNodeCollection Resolve(HtmlDocument document)
         {
-            return null;
+            return document.DocumentNode.SelectNodes(path);
         }
     }
 
     public class NodeRequestAttribute : Attribute
     {
-        public Requests.Types request;
+        public Requests.Types requestType;
         public HtmlDocument Resolve()
         {
-            return null;
+            var request = Requests.GetRequest(requestType);
+            return RequestDispatcher.SendRequest(request);
         }
     }
 

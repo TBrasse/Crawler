@@ -12,5 +12,13 @@ namespace MPKXMLCrawler
         {
             Array.ForEach(array, func);
         }
+
+        static public IEnumerable<TOut> ForEach<TIn,TOut>(this IEnumerable<TIn> enumerator, Func<TIn,TOut> action)
+        {
+            foreach(TIn element in enumerator)
+            {
+                yield return action.Invoke(element);
+            }
+        }
     }
 }

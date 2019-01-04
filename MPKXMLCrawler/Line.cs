@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MPKXMLCrawler
 {
-    [NodeRequest(request = Requests.Types.Lines)]
+    [NodeRequest(requestType = Requests.Types.Lines)]
     [NodeXPath(path = "/html/body/table/tbody/tr/td/table/tr[1]/td/table/tr/td/a")]
     public class Line
     {

@@ -10,44 +10,34 @@ namespace MPKXMLCrawler
 {
     public class HTMLScraper
     {
-        private HtmlDocument document;
-
-        public List<T> Scrap<T>()
+        public IEnumerable<T> Scrap<T>()
         {
-            ActOnAttribute<T,NodeRequestAttribute, HtmlDocument>( s =>{ return null; });
-
             Type typeToScrap = typeof(T);
-            NodeRequestAttribute nrAtrb = typeToScrap.GetCustomAttributes(typeof(NodeRequestAttribute),false).First() as NodeRequestAttribute;
-            Requests.Types requestType = nrAtrb.request;
-            var request = Requests.GetRequest(requestType);
-            document = RequestDispatcher.SendRequest(request);
+            //add error handling: >1 attrib; =0 attrib 
+            NodeRequestAttribute nrAtrb = GetAttribute<NodeRequestAttribute>(typeToScrap);
+            HtmlDocument document = nrAtrb.Resolve();
 
-            NodeXPathAttribute xpAtrb = typeToScrap.GetCustomAttributes(typeof(NodeXPathAttribute), false).First() as NodeXPathAttribute;
-            HtmlNodeCollection htmlNodes = document.DocumentNode.SelectNodes(xpAtrb.path);
-            List<T> objectList = new List<T>();
-            foreach (HtmlNode node in htmlNodes)
-            {
+            NodeXPathAttribute xpAtrb = GetAttribute<NodeXPathAttribute>(typeToScrap);
+            return xpAtrb.Resolve(document).ForEach(node => {
+                //make this smaller somehow:
                 T scrapObject = (T)Activator.CreateInstance(typeToScrap);
-                PropertyInfo[] properties = typeToScrap.GetProperties();
-                foreach(PropertyInfo property in properties)
+                foreach (PropertyInfo property in typeToScrap.GetProperties())
                 {
-                    NodeAttribute atrb = property.GetCustomAttributes().FirstOrDefault() as NodeAttribute;
+                    NodeAttribute atrb = GetAttribute<NodeAttribute>(property);
                     if (atrb != null)
                     {
                         string objectValue = atrb.Resolve(node);
                         property.SetValue(scrapObject, objectValue);
                     }
                 }
-                objectList.Add(scrapObject);
-            }
-            return objectList;
+                return scrapObject;
+
+            });
         }
 
-        private TOut ActOnAttribute<T1,T2,TOut>(Func<T2,TOut> action) where T2 : Attribute
+        private T2 GetAttribute<T2>(MemberInfo typeToScrap) where T2 : Attribute
         {
-            Type typeToScrap = typeof(T1);
-            T2 attribute = typeToScrap.GetCustomAttribute<T2>();
-            return action.Invoke(attribute);
+            return typeToScrap.GetCustomAttribute<T2>();
         }
     }
 }
